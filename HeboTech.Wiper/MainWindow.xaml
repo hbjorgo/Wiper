@@ -1,0 +1,52 @@
+﻿<Window x:Class="HeboTech.Wiper.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:HeboTech.Wiper"
+        mc:Ignorable="d"
+        Closing="Window_Closing"
+        Title="Wiper" Height="350" Width="600">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Row 0 -->
+        <TextBlock Text="Folder name to delete:" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Margin="5"/>
+        <TextBox Text="{Binding FolderToDelete, UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Margin="5"/>
+        <CheckBox Content="Recursive" IsChecked="{Binding IsRecursive}" Grid.Row="0" Grid.Column="2" VerticalAlignment="Center" Margin="5"/>
+
+        <!-- Row 1 -->
+        <TextBlock Text="Root folder:" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Margin="5"/>
+        <TextBox Name="rootFolderTextbox" Text="{Binding RootFolder, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Margin="5"/>
+        <Button Content="Browse..." Command="{Binding BrowseCommand}" Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" Margin="5"/>
+
+        <!-- Row 2 -->
+        <TextBlock Text="{Binding ElementName=folderList, Path=Items.Count, StringFormat={}{0} folders}" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" Margin="5"/>
+        <Button Content="Dry run" Command="{Binding FindFoldersCommand}" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="5" Width="{Binding ElementName=deleteButton, Path=ActualWidth}"/>
+        <Button Name="deleteButton" Content="Delete" Command="{Binding DeleteCommand}" Grid.Row="2" Grid.Column="2" VerticalAlignment="Center" Margin="5"/>
+
+        <!-- Row 3 -->
+        <ListView Name="folderList" ItemsSource="{Binding Folders}" AlternationCount="2" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Style.Triggers>
+                        <Trigger Property="ItemsControl.AlternationIndex" Value="1">
+                            <Setter Property="Background" Value="LightGray"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </ListView.ItemContainerStyle>
+        </ListView>
+
+    </Grid>
+</Window>
