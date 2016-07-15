@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:HeboTech.Wiper"
         mc:Ignorable="d"
         Closing="Window_Closing"
-        Title="Wiper" Height="350" Width="600">
+        Title="Wiper - HeboTech" Height="350" Width="600">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
