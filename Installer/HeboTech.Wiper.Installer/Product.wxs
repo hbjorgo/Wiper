@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<Product Id="*" Name="HeboTech Wiper" Language="1033" Version="0.1.0.0" Manufacturer="HeboTech" UpgradeCode="19b69550-fd16-4d07-8f00-4d01c9053f32">
+		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+
+		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <Media Id="1" Cabinet="product.cab" EmbedCab="yes"/>
+
+    <Feature Id="ProductFeature" Title="HeboTech.Wiper.Installer" Level="1">
+			<ComponentGroupRef Id="ProductComponents" />
+		</Feature>
+	</Product>
+
+	<Fragment>
+		<Directory Id="TARGETDIR" Name="SourceDir">
+			<Directory Id="ProgramFiles64Folder">
+				<Directory Id="COMPANYFOLDER" Name="HeboTech">
+					<Directory Id="INSTALLFOLDER" Name="Wiper" />
+				</Directory>
+			</Directory>
+		</Directory>
+	</Fragment>
+
+	<Fragment>
+		<ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+			 <Component Id="comp_GalaSoft.MvvmLight.dll" Guid="{20BA706C-E740-4D58-AD5F-2E8A09BB85C1}">
+				 <File Id="file_GalaSoft.MvvmLight.dll" KeyPath="yes" Source="$(var.HeboTech.Wiper.TargetDir)GalaSoft.MvvmLight.dll"/>
+			 </Component>
+			<Component Id="comp_HeboTech.Wiper.exe" Guid="{7EB0168A-6FEA-453E-8737-5E13DF04DCE9}">
+				<File Id="file_HeboTech.Wiper.exe" KeyPath="yes" Source="$(var.HeboTech.Wiper.TargetDir)HeboTech.Wiper.exe"/>
+			</Component>
+			<Component Id="comp_HeboTech.Wiper.exe.config" Guid="{A56EE612-514C-4D8C-90D3-16B9C2FA1989}">
+				<File Id="file_HeboTech.Wiper.exe.config" KeyPath="yes" Source="$(var.HeboTech.Wiper.TargetDir)HeboTech.Wiper.exe.config"/>
+			</Component>
+		</ComponentGroup>
+	</Fragment>
+</Wix>
