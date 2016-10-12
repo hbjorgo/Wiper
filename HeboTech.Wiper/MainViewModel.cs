@@ -52,15 +52,22 @@ namespace HeboTech.Wiper
 
         private async Task FindFolders()
         {
-            Folders = await EnumerateFolders(rootFolder, folderToDelete, isRecursive);
+            IEnumerable<string> foldersToDelete = Parse(folderToDelete);
+            Folders = await EnumerateFolders(rootFolder, foldersToDelete, isRecursive);
             CanDelete = true;
         }
 
         private async Task Delete()
         {
-            if (dialogService.ShowConfirmDialog(string.Format("Do you want to delete folder(s) '{0}' in '{1}'?", folderToDelete, rootFolder), "Delete folder(s)?"))
+            IEnumerable<string> foldersToDelete = Parse(folderToDelete);
+
+            if (dialogService.ShowConfirmDialog(
+                string.Format("Do you want to delete folder(s) '{0}' in '{1}'?",
+                    string.Join(", ", foldersToDelete.Select(x => x)),
+                    rootFolder),
+                "Delete folder(s)?"))
             {
-                IEnumerable<string> folders = await EnumerateFolders(rootFolder, folderToDelete, isRecursive);
+                IEnumerable<string> folders = await EnumerateFolders(rootFolder, foldersToDelete, isRecursive);
                 int numberOfDeletedFolders = await DeleteFolders(folders);
                 dialogService.ShowDialog(string.Format("{0} of {1} folder(s) deleted.", numberOfDeletedFolders, folders.Count()), "Folder(s) deleted");
             }
@@ -85,11 +92,19 @@ namespace HeboTech.Wiper
             }
         }
 
-        private Task<IEnumerable<string>> EnumerateFolders(string path, string folderToDelete, bool recursive)
+        private IEnumerable<string> Parse(string input)
+        {
+            return input.Split('|');
+        }
+
+        private Task<IEnumerable<string>> EnumerateFolders(string path, IEnumerable<string> foldersToDelete, bool recursive)
         {
             return Task.Factory.StartNew(() =>
             {
-                return folderOperations.EnumerateFolders(path, folderToDelete, recursive);
+                List<string> allFolders = new List<string>();
+                foreach (string folderToDelete in foldersToDelete)
+                    allFolders.AddRange(folderOperations.EnumerateFolders(path, folderToDelete, recursive));
+                return allFolders as IEnumerable<string>;
             });
         }
 
