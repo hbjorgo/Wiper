@@ -2,6 +2,7 @@
 using GalaSoft.MvvmLight.Command;
 using HeboTech.Wiper.Dialogs;
 using HeboTech.Wiper.IO;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -18,6 +19,13 @@ namespace HeboTech.Wiper
 
         public MainViewModel(IFolderOperations folderOperations, IDialogService dialogService, IFolderBrowserDialogService folderBrowserService)
         {
+            if (folderOperations == null)
+                throw new ArgumentNullException(nameof(folderOperations));
+            if (dialogService == null)
+                throw new ArgumentNullException(nameof(dialogService));
+            if (folderBrowserService == null)
+                throw new ArgumentNullException(nameof(folderBrowserService));
+
             this.folderOperations = folderOperations;
             this.dialogService = dialogService;
             this.folderBrowserService = folderBrowserService;
