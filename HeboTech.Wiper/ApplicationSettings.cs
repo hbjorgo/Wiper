@@ -1,6 +1,6 @@
 ﻿namespace HeboTech.Wiper
 {
-    public class Settings : ISettings
+    public class ApplicationSettings : ISettings
     {
         public T GetSetting<T>(string name)
         {

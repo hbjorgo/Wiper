@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace HeboTech.Wiper.Test
@@ -14,7 +15,8 @@ namespace HeboTech.Wiper.Test
             MainViewModel mvm = new MainViewModel(
                 null,
                 new DialogServiceMockup(true),
-                new FolderBrowserDialogServiceMockup(null));
+                new FolderBrowserDialogServiceMockup(null),
+                new SettingsMockup(null));
         }
 
         [TestMethod]
@@ -24,7 +26,8 @@ namespace HeboTech.Wiper.Test
             MainViewModel mvm = new MainViewModel(
                 new FolderOperationsMockup(null),
                 null,
-                new FolderBrowserDialogServiceMockup(null));
+                new FolderBrowserDialogServiceMockup(null),
+                new SettingsMockup(null));
         }
 
         [TestMethod]
@@ -34,6 +37,18 @@ namespace HeboTech.Wiper.Test
             MainViewModel mvm = new MainViewModel(
                 new FolderOperationsMockup(null),
                 new DialogServiceMockup(true),
+                null,
+                new SettingsMockup(null));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void PassingNullForSettingsProviderShouldThrowExceptionTest()
+        {
+            MainViewModel mvm = new MainViewModel(
+                new FolderOperationsMockup(null),
+                new DialogServiceMockup(true),
+                new FolderBrowserDialogServiceMockup(null),
                 null);
         }
 
@@ -43,7 +58,12 @@ namespace HeboTech.Wiper.Test
             MainViewModel mvm = new MainViewModel(
                 new FolderOperationsMockup("Folder1", "Folder2"),
                 new DialogServiceMockup(true),
-                new FolderBrowserDialogServiceMockup(null));
+                new FolderBrowserDialogServiceMockup(null),
+                new SettingsMockup(new Dictionary<string, object>() {
+                    { "FolderToDelete", "" },
+                    { "RootFolder", null },
+                    { "IsRecursive", false }
+                }));
             mvm.FindFoldersCommand.Execute(null);
 
             Assert.AreEqual(2, mvm.Folders.Count());
@@ -58,7 +78,12 @@ namespace HeboTech.Wiper.Test
             MainViewModel mvm = new MainViewModel(
                 new FolderOperationsMockup("Folder1", "Folder2"),
                 dsm,
-                new FolderBrowserDialogServiceMockup(null));
+                new FolderBrowserDialogServiceMockup(null),
+                new SettingsMockup(new Dictionary<string, object>() {
+                    { "FolderToDelete", "" },
+                    { "RootFolder", null },
+                    { "IsRecursive", false }
+                }));
             mvm.FindFoldersCommand.Execute(null);
             mvm.DeleteCommand.Execute(null);
 

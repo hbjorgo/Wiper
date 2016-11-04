@@ -110,6 +110,8 @@ namespace HeboTech.Wiper
 
         private IEnumerable<string> Parse(string input)
         {
+            if (input == null)
+                return new List<string>();
             return input.Split('|');
         }
 
@@ -178,7 +180,7 @@ namespace HeboTech.Wiper
         public IEnumerable<string> Folders
         {
             get { return folders; }
-            set
+            private set
             {
                 folders = value;
                 RaisePropertyChanged();

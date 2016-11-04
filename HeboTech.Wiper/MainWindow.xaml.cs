@@ -16,7 +16,7 @@ namespace HeboTech.Wiper
                 new FolderOperations(),
                 new MessageBoxService(),
                 new FolderBrowserDialogService(),
-                new Settings());
+                new ApplicationSettings());
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
