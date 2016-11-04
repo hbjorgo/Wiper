@@ -12,7 +12,11 @@ namespace HeboTech.Wiper
         public MainWindow()
         {
             InitializeComponent();
-            DataContext = new MainViewModel(new FolderOperations(), new MessageBoxService(), new FolderBrowserDialogService());
+            DataContext = new MainViewModel(
+                new FolderOperations(),
+                new MessageBoxService(),
+                new FolderBrowserDialogService(),
+                new Settings());
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)

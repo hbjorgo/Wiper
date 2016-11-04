@@ -16,8 +16,13 @@ namespace HeboTech.Wiper
         private IFolderOperations folderOperations;
         private IDialogService dialogService;
         private IFolderBrowserDialogService folderBrowserService;
+        private ISettings settingsProvider;
 
-        public MainViewModel(IFolderOperations folderOperations, IDialogService dialogService, IFolderBrowserDialogService folderBrowserService)
+        public MainViewModel(
+            IFolderOperations folderOperations,
+            IDialogService dialogService,
+            IFolderBrowserDialogService folderBrowserService,
+            ISettings settingsProvider)
         {
             if (folderOperations == null)
                 throw new ArgumentNullException(nameof(folderOperations));
@@ -25,10 +30,13 @@ namespace HeboTech.Wiper
                 throw new ArgumentNullException(nameof(dialogService));
             if (folderBrowserService == null)
                 throw new ArgumentNullException(nameof(folderBrowserService));
+            if (settingsProvider == null)
+                throw new ArgumentNullException(nameof(settingsProvider));
 
             this.folderOperations = folderOperations;
             this.dialogService = dialogService;
             this.folderBrowserService = folderBrowserService;
+            this.settingsProvider = settingsProvider;
 
             LoadSettings();
 
@@ -191,17 +199,17 @@ namespace HeboTech.Wiper
 
         private void SaveSettings()
         {
-            Properties.Settings.Default.FolderToDelete = FolderToDelete;
-            Properties.Settings.Default.RootFolder = RootFolder;
-            Properties.Settings.Default.IsRecursive = IsRecursive;
-            Properties.Settings.Default.Save();
+            settingsProvider.SetSetting(nameof(FolderToDelete), FolderToDelete);
+            settingsProvider.SetSetting(nameof(RootFolder), RootFolder);
+            settingsProvider.SetSetting(nameof(IsRecursive), IsRecursive);
+            settingsProvider.Save();
         }
 
         private void LoadSettings()
         {
-            FolderToDelete = Properties.Settings.Default.FolderToDelete;
-            RootFolder = Properties.Settings.Default.RootFolder;
-            IsRecursive = Properties.Settings.Default.IsRecursive;
+            FolderToDelete = settingsProvider.GetSetting<string>(nameof(FolderToDelete));
+            RootFolder = settingsProvider.GetSetting<string>(nameof(RootFolder));
+            IsRecursive = settingsProvider.GetSetting<bool>(nameof(IsRecursive));
         }
     }
 }
