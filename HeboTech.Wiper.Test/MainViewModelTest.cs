@@ -1,7 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 
 namespace HeboTech.Wiper.Test
 {
@@ -66,6 +68,8 @@ namespace HeboTech.Wiper.Test
                 }));
             mvm.FindFoldersCommand.Execute(null);
 
+            SpinWait(new Func<bool>(() => { return mvm.FindFoldersCommand.Running; }));
+
             Assert.AreEqual(2, mvm.Folders.Count());
             Assert.AreEqual("Folder1", mvm.Folders.ElementAt(0));
             Assert.AreEqual("Folder2", mvm.Folders.ElementAt(1));
@@ -85,9 +89,22 @@ namespace HeboTech.Wiper.Test
                     { "IsRecursive", false }
                 }));
             mvm.FindFoldersCommand.Execute(null);
+            SpinWait(new Func<bool>(() => { return mvm.FindFoldersCommand.Running; }));
             mvm.DeleteCommand.Execute(null);
+            SpinWait(new Func<bool>(() => { return mvm.DeleteCommand.Running; }));
 
             Assert.AreEqual("Do you want to delete folder(s) '' in ''?", dsm.Message);
+        }
+
+        private void SpinWait(Func<bool> evaluate, int timeoutMs = 1000)
+        {
+            Stopwatch sw = Stopwatch.StartNew();
+            while (evaluate.Invoke())
+            {
+                if (sw.ElapsedMilliseconds > timeoutMs)
+                    return;
+                Thread.Yield();
+            }
         }
     }
 }

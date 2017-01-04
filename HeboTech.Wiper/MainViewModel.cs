@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 namespace HeboTech.Wiper
@@ -43,8 +44,8 @@ namespace HeboTech.Wiper
             PropertyChanged += MainViewModel_PropertyChanged;
 
             browseCommand = new RelayCommand(Browse);
-            findFoldersCommand = new RelayCommand(async () => { await FindFolders(); });
-            deleteCommand = new RelayCommand(async () => { await Delete(); }, CanDeleteExecute);
+            findFoldersCommand = new AsyncCommand(async _ => { await Task.Factory.StartNew(() => { FindFolders(); }); });
+            deleteCommand = new AsyncCommand(async _ => { await Task.Factory.StartNew(() => { Delete(); }); }, _ => (canDelete && Folders.Count() > 0));
             saveSettingsCommand = new RelayCommand(SaveSettings);
         }
 
@@ -66,14 +67,16 @@ namespace HeboTech.Wiper
             }
         }
 
-        private async Task FindFolders()
+        private void FindFolders()
         {
+            System.Diagnostics.Debug.WriteLine("Finding...");
             IEnumerable<string> foldersToDelete = Parse(folderToDelete);
-            Folders = await EnumerateFolders(rootFolder, foldersToDelete, isRecursive);
+            Folders = EnumerateFolders(rootFolder, foldersToDelete, isRecursive);
             CanDelete = true;
+            System.Diagnostics.Debug.WriteLine("Done finding.");
         }
 
-        private async Task Delete()
+        private void Delete()
         {
             IEnumerable<string> foldersToDelete = Parse(folderToDelete);
 
@@ -83,8 +86,8 @@ namespace HeboTech.Wiper
                     rootFolder),
                 "Delete folder(s)?"))
             {
-                IEnumerable<string> folders = await EnumerateFolders(rootFolder, foldersToDelete, isRecursive);
-                int numberOfDeletedFolders = await DeleteFolders(folders);
+                IEnumerable<string> folders = EnumerateFolders(rootFolder, foldersToDelete, isRecursive);
+                int numberOfDeletedFolders = DeleteFolders(folders);
                 dialogService.ShowDialog(string.Format("{0} of {1} folder(s) deleted.", numberOfDeletedFolders, folders.Count()), "Folder(s) deleted");
             }
         }
@@ -103,7 +106,9 @@ namespace HeboTech.Wiper
                 if (canDelete != value)
                 {
                     canDelete = value;
-                    deleteCommand.RaiseCanExecuteChanged();
+                    Application.Current.Dispatcher.BeginInvoke(new Action(() => {
+                        deleteCommand.RaiseCanExecuteChanged();
+                    }));
                 }
             }
         }
@@ -115,23 +120,17 @@ namespace HeboTech.Wiper
             return input.Split('|');
         }
 
-        private Task<IEnumerable<string>> EnumerateFolders(string path, IEnumerable<string> foldersToDelete, bool recursive)
+        private IEnumerable<string> EnumerateFolders(string path, IEnumerable<string> foldersToDelete, bool recursive)
         {
-            return Task.Factory.StartNew(() =>
-            {
-                List<string> allFolders = new List<string>();
-                foreach (string folderToDelete in foldersToDelete)
-                    allFolders.AddRange(folderOperations.EnumerateFolders(path, folderToDelete, recursive));
-                return allFolders as IEnumerable<string>;
-            });
+            List<string> allFolders = new List<string>();
+            foreach (string folderToDelete in foldersToDelete)
+                allFolders.AddRange(folderOperations.EnumerateFolders(path, folderToDelete, recursive));
+            return allFolders as IEnumerable<string>;
         }
 
-        private Task<int> DeleteFolders(IEnumerable<string> folders)
+        private int DeleteFolders(IEnumerable<string> folders)
         {
-            return Task.Factory.StartNew(() =>
-            {
-                return folderOperations.DeleteFolders(folders);
-            });
+            return folderOperations.DeleteFolders(folders);
         }
 
         private bool isRecursive = true;
@@ -190,11 +189,11 @@ namespace HeboTech.Wiper
         private RelayCommand browseCommand;
         public ICommand BrowseCommand { get { return browseCommand; } }
 
-        private RelayCommand findFoldersCommand;
-        public ICommand FindFoldersCommand { get { return findFoldersCommand; } }
+        private AsyncCommand findFoldersCommand;
+        public IAsyncCommand FindFoldersCommand { get { return findFoldersCommand; } }
 
-        private RelayCommand deleteCommand;
-        public ICommand DeleteCommand { get { return deleteCommand; } }
+        private AsyncCommand deleteCommand;
+        public IAsyncCommand DeleteCommand { get { return deleteCommand; } }
 
         private RelayCommand saveSettingsCommand;
         public ICommand SaveSettingsCommand { get { return saveSettingsCommand; } }
