@@ -66,11 +66,9 @@ namespace HeboTech.Wiper
 
         private void FindFolders()
         {
-            System.Diagnostics.Debug.WriteLine("Finding...");
             IEnumerable<string> foldersToDelete = Parse(folderToDelete);
             Folders = EnumerateFolders(rootFolder, foldersToDelete, isRecursive);
             CanDelete = true;
-            System.Diagnostics.Debug.WriteLine("Done finding.");
         }
 
         private void Delete()
