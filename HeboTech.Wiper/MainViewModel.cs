@@ -42,11 +42,6 @@ namespace HeboTech.Wiper
             LoadSettings();
 
             PropertyChanged += MainViewModel_PropertyChanged;
-
-            browseCommand = new RelayCommand(Browse);
-            findFoldersCommand = new AsyncCommand(async _ => { await Task.Factory.StartNew(() => { FindFolders(); }); });
-            deleteCommand = new AsyncCommand(async _ => { await Task.Factory.StartNew(() => { Delete(); }); }, _ => (canDelete && Folders.Count() > 0));
-            saveSettingsCommand = new RelayCommand(SaveSettings);
         }
 
         private void MainViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -187,16 +182,40 @@ namespace HeboTech.Wiper
         }
 
         private RelayCommand browseCommand;
-        public ICommand BrowseCommand { get { return browseCommand; } }
+        public ICommand BrowseCommand
+        {
+            get
+            {
+                return browseCommand ?? (browseCommand = new RelayCommand(Browse));
+            }
+        }
 
         private AsyncCommand findFoldersCommand;
-        public IAsyncCommand FindFoldersCommand { get { return findFoldersCommand; } }
+        public IAsyncCommand FindFoldersCommand
+        {
+            get
+            {
+                return findFoldersCommand ?? (findFoldersCommand = new AsyncCommand(async _ => { await Task.Factory.StartNew(() => { FindFolders(); }); }));
+            }
+        }
 
         private AsyncCommand deleteCommand;
-        public IAsyncCommand DeleteCommand { get { return deleteCommand; } }
+        public IAsyncCommand DeleteCommand
+        {
+            get
+            {
+                return deleteCommand ?? (deleteCommand = new AsyncCommand(async _ => { await Task.Factory.StartNew(() => { Delete(); }); }, _ => (canDelete && Folders.Count() > 0)));
+            }
+        }
 
         private RelayCommand saveSettingsCommand;
-        public ICommand SaveSettingsCommand { get { return saveSettingsCommand; } }
+        public ICommand SaveSettingsCommand
+        {
+            get
+            {
+                return saveSettingsCommand ?? (saveSettingsCommand = new RelayCommand(SaveSettings));
+            }
+        }
 
         private void SaveSettings()
         {
