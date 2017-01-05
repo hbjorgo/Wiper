@@ -27,16 +27,18 @@ namespace HeboTech.Wiper
         {
             if (folderOperations == null)
                 throw new ArgumentNullException(nameof(folderOperations));
+            this.folderOperations = folderOperations;
+
             if (dialogService == null)
                 throw new ArgumentNullException(nameof(dialogService));
+            this.dialogService = dialogService;
+
             if (folderBrowserService == null)
                 throw new ArgumentNullException(nameof(folderBrowserService));
+            this.folderBrowserService = folderBrowserService;
+
             if (settingsProvider == null)
                 throw new ArgumentNullException(nameof(settingsProvider));
-
-            this.folderOperations = folderOperations;
-            this.dialogService = dialogService;
-            this.folderBrowserService = folderBrowserService;
             this.settingsProvider = settingsProvider;
 
             LoadSettings();
