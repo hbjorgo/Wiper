@@ -25,5 +25,12 @@ namespace HeboTech.Wiper
             if (vm.SaveSettingsCommand.CanExecute(null))
                 vm.SaveSettingsCommand.Execute(null);
         }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            MainViewModel vm = (MainViewModel)DataContext;
+            if (vm.LoadSettingsCommand.CanExecute(null))
+                vm.LoadSettingsCommand.Execute(null);
+        }
     }
 }

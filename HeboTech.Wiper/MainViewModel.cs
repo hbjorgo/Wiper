@@ -41,8 +41,6 @@ namespace HeboTech.Wiper
                 throw new ArgumentNullException(nameof(settingsProvider));
             this.settingsProvider = settingsProvider;
 
-            LoadSettings();
-
             PropertyChanged += MainViewModel_PropertyChanged;
         }
 
@@ -209,6 +207,15 @@ namespace HeboTech.Wiper
             get
             {
                 return saveSettingsCommand ?? (saveSettingsCommand = new RelayCommand(SaveSettings));
+            }
+        }
+
+        private RelayCommand loadSettingsCommnad;
+        public ICommand LoadSettingsCommand
+        {
+            get
+            {
+                return loadSettingsCommnad ?? (loadSettingsCommnad = new RelayCommand(LoadSettings));
             }
         }
 
