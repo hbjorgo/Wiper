@@ -87,11 +87,6 @@ namespace HeboTech.Wiper
             }
         }
 
-        private bool CanDeleteExecute()
-        {
-            return canDelete && Folders.Count() > 0;
-        }
-
         private bool canDelete = false;
         public bool CanDelete
         {
