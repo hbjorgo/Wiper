@@ -59,11 +59,8 @@
   </Choose>
   <ItemGroup>
     <Compile Include="DialogServiceMockup.cs" />
-    <Compile Include="FolderBrowserDialogServiceMockup.cs" />
-    <Compile Include="FolderOperationsMockup.cs" />
     <Compile Include="MainViewModelTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SettingsMockup.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\HeboTech.Wiper\HeboTech.Wiper.csproj">
