@@ -82,16 +82,16 @@ namespace HeboTech.Wiper.Test
         [TestMethod]
         public void DeleteCommandShouldShowDialogWithCorrectText()
         {
+            var folderOperationsMock = new Mock<IFolderOperations>();
+            folderOperationsMock.Setup(x => x.EnumerateFolders(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>())).Returns(new List<string> { "Folder1", "Folder2" });
+
             DialogServiceMockup dsm = new DialogServiceMockup(false);
             MainViewModel mvm = new MainViewModel(
-                new FolderOperationsMockup("Folder1", "Folder2"),
+                folderOperationsMock.Object,
                 dsm,
-                new FolderBrowserDialogServiceMockup(null),
-                new SettingsMockup(new Dictionary<string, object>() {
-                    { "FolderToDelete", "" },
-                    { "RootFolder", null },
-                    { "IsRecursive", false }
-                }));
+                new Mock<IFolderBrowserDialogService>().Object,
+                new Mock<ISettings>().Object);
+
             mvm.FindFoldersCommand.Execute(null);
             SpinWait(new Func<bool>(() => { return mvm.FindFoldersCommand.Running; }));
             mvm.DeleteCommand.Execute(null);
