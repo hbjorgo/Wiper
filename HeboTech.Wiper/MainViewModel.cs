@@ -79,8 +79,7 @@ namespace HeboTech.Wiper
                     rootFolder),
                 "Delete folder(s)?"))
             {
-                IEnumerable<string> folders = EnumerateFolders(rootFolder, foldersToDelete, isRecursive);
-                int numberOfDeletedFolders = DeleteFolders(folders);
+                int numberOfDeletedFolders = DeleteFolders(Folders);
                 dialogService.ShowDialog(string.Format("{0} of {1} folder(s) deleted.", numberOfDeletedFolders, folders.Count()), "Folder(s) deleted");
             }
         }
@@ -94,7 +93,7 @@ namespace HeboTech.Wiper
                 if (canDelete != value)
                 {
                     canDelete = value;
-                    Application.Current.Dispatcher.BeginInvoke(new Action(() => {
+                    Application.Current?.Dispatcher?.BeginInvoke(new Action(() => {
                         deleteCommand.RaiseCanExecuteChanged();
                     }));
                 }

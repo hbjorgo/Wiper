@@ -1,4 +1,7 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using HeboTech.Wiper.Dialogs;
+using HeboTech.Wiper.IO;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -16,9 +19,9 @@ namespace HeboTech.Wiper.Test
         {
             MainViewModel mvm = new MainViewModel(
                 null,
-                new DialogServiceMockup(true),
-                new FolderBrowserDialogServiceMockup(null),
-                new SettingsMockup(null));
+                new Mock<IDialogService>().Object,
+                new Mock<IFolderBrowserDialogService>().Object,
+                new Mock<ISettings>().Object);
         }
 
         [TestMethod]
@@ -26,10 +29,10 @@ namespace HeboTech.Wiper.Test
         public void PassingNullForDialogServicesShouldThrowExceptionTest()
         {
             MainViewModel mvm = new MainViewModel(
-                new FolderOperationsMockup(null),
+                new Mock<IFolderOperations>().Object,
                 null,
-                new FolderBrowserDialogServiceMockup(null),
-                new SettingsMockup(null));
+                new Mock<IFolderBrowserDialogService>().Object,
+                new Mock<ISettings>().Object);
         }
 
         [TestMethod]
@@ -37,10 +40,10 @@ namespace HeboTech.Wiper.Test
         public void PassingNullForFolderBrowserDialogServiceShouldThrowExceptionTest()
         {
             MainViewModel mvm = new MainViewModel(
-                new FolderOperationsMockup(null),
-                new DialogServiceMockup(true),
+                new Mock<IFolderOperations>().Object,
+                new Mock<IDialogService>().Object,
                 null,
-                new SettingsMockup(null));
+                new Mock<ISettings>().Object);
         }
 
         [TestMethod]
@@ -48,24 +51,25 @@ namespace HeboTech.Wiper.Test
         public void PassingNullForSettingsProviderShouldThrowExceptionTest()
         {
             MainViewModel mvm = new MainViewModel(
-                new FolderOperationsMockup(null),
-                new DialogServiceMockup(true),
-                new FolderBrowserDialogServiceMockup(null),
+                new Mock<IFolderOperations>().Object,
+                new Mock<IDialogService>().Object,
+                new Mock<IFolderBrowserDialogService>().Object,
                 null);
         }
 
         [TestMethod]
         public void FindFoldersCommandShouldPopulateFoldersPropertyTest()
         {
+            var folderOperationsMock = new Mock<IFolderOperations>();
+            folderOperationsMock.Setup(x => x.EnumerateFolders(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>())).Returns(new List<string> { "Folder1", "Folder2" });
+
             MainViewModel mvm = new MainViewModel(
-                new FolderOperationsMockup("Folder1", "Folder2"),
-                new DialogServiceMockup(true),
-                new FolderBrowserDialogServiceMockup(null),
-                new SettingsMockup(new Dictionary<string, object>() {
-                    { "FolderToDelete", "" },
-                    { "RootFolder", null },
-                    { "IsRecursive", false }
-                }));
+                folderOperationsMock.Object,
+                new Mock<IDialogService>().Object,
+                new Mock<IFolderBrowserDialogService>().Object,
+                new Mock<ISettings>().Object);
+            mvm.FolderToDelete = "";
+
             mvm.FindFoldersCommand.Execute(null);
 
             SpinWait(new Func<bool>(() => { return mvm.FindFoldersCommand.Running; }));
@@ -76,7 +80,7 @@ namespace HeboTech.Wiper.Test
         }
 
         [TestMethod]
-        public void AbortDeleteCommandShouldShowDialogWithCorrectText()
+        public void DeleteCommandShouldShowDialogWithCorrectText()
         {
             DialogServiceMockup dsm = new DialogServiceMockup(false);
             MainViewModel mvm = new MainViewModel(
