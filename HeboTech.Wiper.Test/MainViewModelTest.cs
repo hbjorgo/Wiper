@@ -58,6 +58,42 @@ namespace HeboTech.Wiper.Test
         }
 
         [TestMethod]
+        public void BrowseCommandOkShouldSetRootFolderTest()
+        {
+            var folderBrowserDialogServiceMock = new Mock<IFolderBrowserDialogService>();
+            folderBrowserDialogServiceMock.Setup(x => x.ShowDialog(It.IsAny<string>())).Returns(true);
+            folderBrowserDialogServiceMock.Setup(x => x.SelectedFolder).Returns(@"C:\Temp");
+
+            MainViewModel mvm = new MainViewModel(
+                new Mock<IFolderOperations>().Object,
+                new Mock<IDialogService>().Object,
+                folderBrowserDialogServiceMock.Object,
+                new Mock<ISettings>().Object);
+
+            mvm.BrowseCommand.Execute(null);
+
+            Assert.AreEqual(@"C:\Temp", mvm.RootFolder);
+        }
+
+        [TestMethod]
+        public void BrowseCommandCancelShouldNotSetRootFolderTest()
+        {
+            var folderBrowserDialogServiceMock = new Mock<IFolderBrowserDialogService>();
+            folderBrowserDialogServiceMock.Setup(x => x.ShowDialog(It.IsAny<string>())).Returns(false);
+            folderBrowserDialogServiceMock.Setup(x => x.SelectedFolder).Returns(@"C:\Temp");
+
+            MainViewModel mvm = new MainViewModel(
+                new Mock<IFolderOperations>().Object,
+                new Mock<IDialogService>().Object,
+                folderBrowserDialogServiceMock.Object,
+                new Mock<ISettings>().Object);
+
+            mvm.BrowseCommand.Execute(null);
+
+            Assert.AreEqual(null, mvm.RootFolder);
+        }
+
+        [TestMethod]
         public void FindFoldersCommandShouldPopulateFoldersPropertyTest()
         {
             var folderOperationsMock = new Mock<IFolderOperations>();
