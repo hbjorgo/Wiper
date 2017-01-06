@@ -121,7 +121,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="AsyncCommand.cs" />
-    <Compile Include="AsyncRelayCommand.cs" />
     <Compile Include="Dialogs\FolderBrowserDialogService.cs" />
     <Compile Include="Dialogs\IDialogService.cs" />
     <Compile Include="Dialogs\IFolderBrowserDialogService.cs" />
