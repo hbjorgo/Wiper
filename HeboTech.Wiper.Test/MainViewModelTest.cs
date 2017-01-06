@@ -85,10 +85,18 @@ namespace HeboTech.Wiper.Test
             var folderOperationsMock = new Mock<IFolderOperations>();
             folderOperationsMock.Setup(x => x.EnumerateFolders(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>())).Returns(new List<string> { "Folder1", "Folder2" });
 
-            DialogServiceMockup dsm = new DialogServiceMockup(false);
+            string dialogMessageResult = string.Empty;
+            string dialogCaptionResult = string.Empty;
+            var dialogServiceMock = new Mock<IDialogService>();
+            dialogServiceMock.Setup(x => x.ShowConfirmDialog(It.IsAny<string>(), It.IsAny<string>())).Callback<string, string>((msg,cap) =>
+            {
+                dialogMessageResult = msg;
+                dialogCaptionResult = cap;
+            });
+
             MainViewModel mvm = new MainViewModel(
                 folderOperationsMock.Object,
-                dsm,
+                dialogServiceMock.Object,
                 new Mock<IFolderBrowserDialogService>().Object,
                 new Mock<ISettings>().Object);
 
@@ -97,7 +105,9 @@ namespace HeboTech.Wiper.Test
             mvm.DeleteCommand.Execute(null);
             SpinWait(new Func<bool>(() => { return mvm.DeleteCommand.Running; }));
 
-            Assert.AreEqual("Do you want to delete folder(s) '' in ''?", dsm.Message);
+            
+            Assert.AreEqual("Do you want to delete folder(s) '' in ''?", dialogMessageResult);
+            Assert.AreEqual("Delete folder(s)?", dialogCaptionResult);
         }
 
         private void SpinWait(Func<bool> evaluate, int timeoutMs = 1000)

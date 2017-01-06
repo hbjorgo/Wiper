@@ -58,7 +58,6 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="DialogServiceMockup.cs" />
     <Compile Include="MainViewModelTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
