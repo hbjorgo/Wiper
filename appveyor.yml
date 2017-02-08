@@ -17,4 +17,4 @@ test:
   assemblies: '**\*.Test.dll'
 artifacts:
 - path: '**\HeboTech.Wiper.msi'
-  name: HeboTech.Wiper.$(Appveyor_ProjectName).msi
+  name: HeboTech.Wiper.$(APPVEYOR_BUILD_VERSION).msi
