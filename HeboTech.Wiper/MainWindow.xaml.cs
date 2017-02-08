@@ -12,7 +12,11 @@ namespace HeboTech.Wiper
         public MainWindow()
         {
             InitializeComponent();
-            DataContext = new MainViewModel(new FolderOperations(), new MessageBoxService(), new FolderBrowserDialogService());
+            DataContext = new MainViewModel(
+                new FolderOperations(),
+                new MessageBoxService(),
+                new FolderBrowserDialogService(),
+                new ApplicationSettings());
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -20,6 +24,13 @@ namespace HeboTech.Wiper
             MainViewModel vm = (MainViewModel)DataContext;
             if (vm.SaveSettingsCommand.CanExecute(null))
                 vm.SaveSettingsCommand.Execute(null);
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            MainViewModel vm = (MainViewModel)DataContext;
+            if (vm.LoadSettingsCommand.CanExecute(null))
+                vm.LoadSettingsCommand.Execute(null);
         }
     }
 }

@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 namespace HeboTech.Wiper
@@ -16,28 +17,31 @@ namespace HeboTech.Wiper
         private IFolderOperations folderOperations;
         private IDialogService dialogService;
         private IFolderBrowserDialogService folderBrowserService;
+        private ISettings settingsProvider;
 
-        public MainViewModel(IFolderOperations folderOperations, IDialogService dialogService, IFolderBrowserDialogService folderBrowserService)
+        public MainViewModel(
+            IFolderOperations folderOperations,
+            IDialogService dialogService,
+            IFolderBrowserDialogService folderBrowserService,
+            ISettings settingsProvider)
         {
             if (folderOperations == null)
                 throw new ArgumentNullException(nameof(folderOperations));
+            this.folderOperations = folderOperations;
+
             if (dialogService == null)
                 throw new ArgumentNullException(nameof(dialogService));
+            this.dialogService = dialogService;
+
             if (folderBrowserService == null)
                 throw new ArgumentNullException(nameof(folderBrowserService));
-
-            this.folderOperations = folderOperations;
-            this.dialogService = dialogService;
             this.folderBrowserService = folderBrowserService;
 
-            LoadSettings();
+            if (settingsProvider == null)
+                throw new ArgumentNullException(nameof(settingsProvider));
+            this.settingsProvider = settingsProvider;
 
             PropertyChanged += MainViewModel_PropertyChanged;
-
-            browseCommand = new RelayCommand(Browse);
-            findFoldersCommand = new RelayCommand(async () => { await FindFolders(); });
-            deleteCommand = new RelayCommand(async () => { await Delete(); }, CanDeleteExecute);
-            saveSettingsCommand = new RelayCommand(SaveSettings);
         }
 
         private void MainViewModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -58,14 +62,14 @@ namespace HeboTech.Wiper
             }
         }
 
-        private async Task FindFolders()
+        private void FindFolders()
         {
             IEnumerable<string> foldersToDelete = Parse(folderToDelete);
-            Folders = await EnumerateFolders(rootFolder, foldersToDelete, isRecursive);
+            Folders = EnumerateFolders(rootFolder, foldersToDelete, isRecursive);
             CanDelete = true;
         }
 
-        private async Task Delete()
+        private void Delete()
         {
             IEnumerable<string> foldersToDelete = Parse(folderToDelete);
 
@@ -75,15 +79,9 @@ namespace HeboTech.Wiper
                     rootFolder),
                 "Delete folder(s)?"))
             {
-                IEnumerable<string> folders = await EnumerateFolders(rootFolder, foldersToDelete, isRecursive);
-                int numberOfDeletedFolders = await DeleteFolders(folders);
+                int numberOfDeletedFolders = DeleteFolders(Folders);
                 dialogService.ShowDialog(string.Format("{0} of {1} folder(s) deleted.", numberOfDeletedFolders, folders.Count()), "Folder(s) deleted");
             }
-        }
-
-        private bool CanDeleteExecute()
-        {
-            return canDelete && Folders.Count() > 0;
         }
 
         private bool canDelete = false;
@@ -95,33 +93,31 @@ namespace HeboTech.Wiper
                 if (canDelete != value)
                 {
                     canDelete = value;
-                    deleteCommand.RaiseCanExecuteChanged();
+                    Application.Current?.Dispatcher?.BeginInvoke(new Action(() => {
+                        deleteCommand.RaiseCanExecuteChanged();
+                    }));
                 }
             }
         }
 
         private IEnumerable<string> Parse(string input)
         {
+            if (input == null)
+                return new List<string>();
             return input.Split('|');
         }
 
-        private Task<IEnumerable<string>> EnumerateFolders(string path, IEnumerable<string> foldersToDelete, bool recursive)
+        private IEnumerable<string> EnumerateFolders(string path, IEnumerable<string> foldersToDelete, bool recursive)
         {
-            return Task.Factory.StartNew(() =>
-            {
-                List<string> allFolders = new List<string>();
-                foreach (string folderToDelete in foldersToDelete)
-                    allFolders.AddRange(folderOperations.EnumerateFolders(path, folderToDelete, recursive));
-                return allFolders as IEnumerable<string>;
-            });
+            List<string> allFolders = new List<string>();
+            foreach (string folderToDelete in foldersToDelete)
+                allFolders.AddRange(folderOperations.EnumerateFolders(path, folderToDelete, recursive));
+            return allFolders as IEnumerable<string>;
         }
 
-        private Task<int> DeleteFolders(IEnumerable<string> folders)
+        private int DeleteFolders(IEnumerable<string> folders)
         {
-            return Task.Factory.StartNew(() =>
-            {
-                return folderOperations.DeleteFolders(folders);
-            });
+            return folderOperations.DeleteFolders(folders);
         }
 
         private bool isRecursive = true;
@@ -170,7 +166,7 @@ namespace HeboTech.Wiper
         public IEnumerable<string> Folders
         {
             get { return folders; }
-            set
+            private set
             {
                 folders = value;
                 RaisePropertyChanged();
@@ -178,30 +174,63 @@ namespace HeboTech.Wiper
         }
 
         private RelayCommand browseCommand;
-        public ICommand BrowseCommand { get { return browseCommand; } }
+        public ICommand BrowseCommand
+        {
+            get
+            {
+                return browseCommand ?? (browseCommand = new RelayCommand(Browse));
+            }
+        }
 
-        private RelayCommand findFoldersCommand;
-        public ICommand FindFoldersCommand { get { return findFoldersCommand; } }
+        private AsyncCommand findFoldersCommand;
+        public IAsyncCommand FindFoldersCommand
+        {
+            get
+            {
+                return findFoldersCommand ?? (findFoldersCommand = new AsyncCommand(async _ => { await Task.Factory.StartNew(() => { FindFolders(); }); }));
+            }
+        }
 
-        private RelayCommand deleteCommand;
-        public ICommand DeleteCommand { get { return deleteCommand; } }
+        private AsyncCommand deleteCommand;
+        public IAsyncCommand DeleteCommand
+        {
+            get
+            {
+                return deleteCommand ?? (deleteCommand = new AsyncCommand(async _ => { await Task.Factory.StartNew(() => { Delete(); }); }, _ => (canDelete && Folders.Count() > 0)));
+            }
+        }
 
         private RelayCommand saveSettingsCommand;
-        public ICommand SaveSettingsCommand { get { return saveSettingsCommand; } }
+        public ICommand SaveSettingsCommand
+        {
+            get
+            {
+                return saveSettingsCommand ?? (saveSettingsCommand = new RelayCommand(SaveSettings));
+            }
+        }
+
+        private RelayCommand loadSettingsCommnad;
+        public ICommand LoadSettingsCommand
+        {
+            get
+            {
+                return loadSettingsCommnad ?? (loadSettingsCommnad = new RelayCommand(LoadSettings));
+            }
+        }
 
         private void SaveSettings()
         {
-            Properties.Settings.Default.FolderToDelete = FolderToDelete;
-            Properties.Settings.Default.RootFolder = RootFolder;
-            Properties.Settings.Default.IsRecursive = IsRecursive;
-            Properties.Settings.Default.Save();
+            settingsProvider.SetSetting(nameof(FolderToDelete), FolderToDelete);
+            settingsProvider.SetSetting(nameof(RootFolder), RootFolder);
+            settingsProvider.SetSetting(nameof(IsRecursive), IsRecursive);
+            settingsProvider.Save();
         }
 
         private void LoadSettings()
         {
-            FolderToDelete = Properties.Settings.Default.FolderToDelete;
-            RootFolder = Properties.Settings.Default.RootFolder;
-            IsRecursive = Properties.Settings.Default.IsRecursive;
+            FolderToDelete = settingsProvider.GetSetting<string>(nameof(FolderToDelete));
+            RootFolder = settingsProvider.GetSetting<string>(nameof(RootFolder));
+            IsRecursive = settingsProvider.GetSetting<bool>(nameof(IsRecursive));
         }
     }
 }

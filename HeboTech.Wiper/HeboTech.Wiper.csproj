@@ -111,6 +111,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ApplicationSettings.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -119,12 +120,15 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="AsyncCommand.cs" />
     <Compile Include="Dialogs\FolderBrowserDialogService.cs" />
     <Compile Include="Dialogs\IDialogService.cs" />
     <Compile Include="Dialogs\IFolderBrowserDialogService.cs" />
     <Compile Include="Dialogs\MessageBoxService.cs" />
+    <Compile Include="IAsyncCommand.cs" />
     <Compile Include="IO\FolderOperations.cs" />
     <Compile Include="IO\IFolderOperations.cs" />
+    <Compile Include="ISettings.cs" />
     <Compile Include="MainViewModel.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
