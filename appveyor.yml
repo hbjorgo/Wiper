@@ -17,4 +17,4 @@ test:
   assemblies: '**\*.Test.dll'
 artifacts:
 - path: '**\HeboTech.Wiper.msi'
-  name: HeboTech.Wiper.msi
+  name: TestName.msi
